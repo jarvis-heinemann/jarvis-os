@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClaimHaus ROI Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .calculator {
+            padding: 40px;
+        }
+        
+        .input-group {
+            margin-bottom: 24px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #0066ff;
+        }
+        
+        .input-help {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .calculate-btn {
+            width: 100%;
+            padding: 16px;
+            background: #0066ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 24px;
+        }
+        
+        .calculate-btn:hover {
+            background: #0052cc;
+        }
+        
+        .results {
+            background: #f5f5f5;
+            padding: 40px;
+            border-top: 2px solid #e5e5e5;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+        }
+        
+        .results h2 {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .result-card.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .result-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .result-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0066ff;
+        }
+        
+        .result-value.green {
+            color: #00cc66;
+        }
+        
+        .result-note {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        .cta {
+            text-align: center;
+            padding: 24px;
+            background: white;
+            border-radius: 8px;
+            margin-top: 24px;
+        }
+        
+        .cta h3 {
+            font-size: 20px;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+        
+        .cta-btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: #0066ff;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        
+        .cta-btn:hover {
+            background: #0052cc;
+        }
+        
+        .assumptions {
+            margin-top: 32px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .assumptions h4 {
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        
+        .assumptions ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .assumptions li {
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+        
+        .assumptions li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #0066ff;
+        }
+        
+        @media (max-width: 600px) {
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ClaimHaus ROI Calculator</h1>
+            <p>See how much value ClaimHaus can deliver for your portfolio</p>
+        </div>
+        
+        <div class="calculator">
+            <div class="input-group">
+                <label>Portfolio Size ($)</label>
+                <input type="number" id="portfolioSize" value="50000000" placeholder="50000000">
+                <div class="input-help">Total value of your debt portfolio (e.g., $50,000,000)</div>
+            </div>
+            
+            <div class="input-group">
+                <label>Current Collection Rate (%)</label>
+                <input type="number" id="collectionRate" value="15" step="0.1" placeholder="15">
+                <div class="input-help">Percentage of portfolio collected annually (industry avg: 15%)</div>
+            </div>
+            
+            <div class="input-group">
+                <label>Current Collection Cycle (days)</label>
+                <input type="number" id="collectionCycle" value="180" placeholder="180">
+                <div class="input-help">Average days to collect (industry avg: 180 days)</div>
+            </div>
+            
+            <div class="input-group">
+                <label>Annual Compliance Costs ($)</label>
+                <input type="number" id="complianceCost" value="50000" placeholder="50000">
+                <div class="input-help">Audit prep, reporting, compliance staff (e.g., $50,000)</div>
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateROI()">Calculate ROI</button>
+        </div>
+        
+        <div class="results" id="results">
+            <h2>Your Projected Results with ClaimHaus</h2>
+            
+            <div class="result-grid">
+                <div class="result-card">
+                    <div class="result-label">New Collection Cycle</div>
+                    <div class="result-value green" id="newCycle">108 days</div>
+                    <div class="result-note">40% faster</div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-label">New Collection Rate</div>
+                    <div class="result-value green" id="newRate">21%</div>
+                    <div class="result-note">+6% improvement</div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-label">Additional Collections</div>
+                    <div class="result-value green" id="additionalCollections">$3M</div>
+                    <div class="result-note">per year</div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-label">Compliance Savings</div>
+                    <div class="result-value green" id="complianceSavings">$12.5K</div>
+                    <div class="result-note">per year</div>
+                </div>
+                
+                <div class="result-card full-width">
+                    <div class="result-label">Total Annual Value</div>
+                    <div class="result-value" id="totalValue">$3.01M</div>
+                    <div class="result-note">from ClaimHaus implementation</div>
+                </div>
+                
+                <div class="result-card full-width">
+                    <div class="result-label">3-Year ROI</div>
+                    <div class="result-value" id="roi">600x</div>
+                    <div class="result-note">based on $5K pilot + $30K/year production</div>
+                </div>
+            </div>
+            
+            <div class="cta">
+                <h3>Ready to achieve these results?</h3>
+                <p style="color: #666; margin-bottom: 16px;">Start with a 90-day pilot for just $5,000</p>
+                <a href="mailto:gabriel@claimhaus.com?subject=Pilot%20Interest" class="cta-btn">Request Pilot →</a>
+            </div>
+            
+            <div class="assumptions">
+                <h4>Assumptions:</h4>
+                <ul>
+                    <li>40% faster collection cycles (industry average improvement)</li>
+                    <li>25% reduction in compliance costs</li>
+                    <li>6% improvement in collection rate (15% → 21%)</li>
+                    <li>Production cost: $2.5K/month ($30K/year)</li>
+                    <li>Results based on similar client deployments</li>
+                </ul>
+                <p style="margin-top: 12px;"><strong>Disclaimer:</strong> Results may vary. These projections are based on average client performance and should not be considered guarantees.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function calculateROI() {
+            // Get inputs
+            const portfolioSize = parseFloat(document.getElementById('portfolioSize').value) || 0;
+            const collectionRate = parseFloat(document.getElementById('collectionRate').value) || 0;
+            const collectionCycle = parseFloat(document.getElementById('collectionCycle').value) || 0;
+            const complianceCost = parseFloat(document.getElementById('complianceCost').value) || 0;
+            
+            // Calculate improvements
+            const newCollectionCycle = Math.round(collectionCycle * 0.6); // 40% faster
+            const newCollectionRate = collectionRate + 6; // +6% improvement
+            const newComplianceCost = complianceCost * 0.75; // 25% reduction
+            
+            // Calculate value
+            const currentCollections = portfolioSize * (collectionRate / 100);
+            const newCollections = portfolioSize * (newCollectionRate / 100);
+            const additionalCollections = newCollections - currentCollections;
+            const complianceSavings = complianceCost - newComplianceCost;
+            const totalValue = additionalCollections + complianceSavings;
+            
+            // Calculate ROI (3-year)
+            const threeYearValue = totalValue * 3;
+            const threeYearCost = 5000 + (30000 * 3); // Pilot + 3 years production
+            const roi = Math.round(threeYearValue / threeYearCost);
+            
+            // Update results
+            document.getElementById('newCycle').textContent = newCollectionCycle + ' days';
+            document.getElementById('newRate').textContent = newCollectionRate + '%';
+            document.getElementById('additionalCollections').textContent = '$' + (additionalCollections / 1000000).toFixed(1) + 'M';
+            document.getElementById('complianceSavings').textContent = '$' + (complianceSavings / 1000).toFixed(1) + 'K';
+            document.getElementById('totalValue').textContent = '$' + (totalValue / 1000000).toFixed(2) + 'M';
+            document.getElementById('roi').textContent = roi + 'x';
+            
+            // Show results
+            document.getElementById('results').classList.add('show');
+            
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Auto-calculate on load
+        window.addEventListener('load', calculateROI);
+    </script>
+</body>
+</html>

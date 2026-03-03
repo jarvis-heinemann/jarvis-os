@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Mission Control — Patent Portfolio Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --border-color: #2a2a2a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            margin-bottom: 32px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .logo .tagline {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .nav-item .icon {
+            font-size: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .panel-title {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .stat-change {
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .stat-change.positive {
+            color: var(--accent-green);
+        }
+
+        .stat-change.negative {
+            color: var(--accent-red);
+        }
+
+        /* Patent Cards */
+        .patent-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .patent-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .patent-info {
+            flex: 1;
+        }
+
+        .patent-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .patent-meta {
+            color: var(--text-secondary);
+            font-size: 14px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .patent-status {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-provisional {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-blue);
+        }
+
+        .status-continuation {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-yellow);
+        }
+
+        .status-granted {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+        }
+
+        .status-pending {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+        }
+
+        /* Timeline */
+        .timeline {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .timeline-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-date {
+            min-width: 120px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-event {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .timeline-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .deadline-urgent {
+            color: var(--accent-red);
+        }
+
+        .deadline-warning {
+            color: var(--accent-yellow);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        textarea.form-input {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 32px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 28px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <h1>🧬 IP Mission Control</h1>
+                <p class="tagline">Patent Portfolio Manager</p>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item active" data-panel="dashboard">
+                    <span class="icon">📊</span>
+                    <span class="label">Dashboard</span>
+                </li>
+                <li class="nav-item" data-panel="provisionals">
+                    <span class="icon">📝</span>
+                    <span class="label">Provisionals</span>
+                </li>
+                <li class="nav-item" data-panel="continuations">
+                    <span class="icon">📄</span>
+                    <span class="label">Continuations</span>
+                </li>
+                <li class="nav-item" data-panel="deadlines">
+                    <span class="icon">⏰</span>
+                    <span class="label">Deadlines</span>
+                </li>
+                <li class="nav-item" data-panel="documents">
+                    <span class="icon">📁</span>
+                    <span class="label">Documents</span>
+                </li>
+                <li class="nav-item" data-panel="analytics">
+                    <span class="icon">📈</span>
+                    <span class="label">Analytics</span>
+                </li>
+                <li class="nav-item" data-panel="workflow">
+                    <span class="icon">🔄</span>
+                    <span class="label">Workflow</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Panel -->
+            <section class="panel active" id="dashboard-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">IP Portfolio Dashboard</h2>
+                    <div class="panel-actions">
+                        <button class="btn btn-secondary" onclick="showImportInstructions()">📋 Import Help</button>
+                        <button class="btn btn-secondary" onclick="showImportModal()">📥 Import CSV</button>
+                        <button class="btn btn-secondary" onclick="exportPortfolio()">📤 Export</button>
+                        <button class="btn btn-primary" onclick="showAddPatentModal()">+ Add Patent</button>
+                    </div>
+                </div>
+
+                <!-- Search & Filters -->
+                <div id="search-filters" style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; margin-bottom: 16px;"></div>
+
+                <!-- Quick Add Templates -->
+                <div style="margin-bottom: 24px;">
+                    <h4 style="margin-bottom: 8px; color: var(--text-secondary);">⚡ Quick Add Template</h4>
+                    <div id="quick-add-buttons"></div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Patents</div>
+                        <div class="stat-value" id="total-patents">0</div>
+                        <div class="stat-change positive">Portfolio tracking active</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Provisionals Filed</div>
+                        <div class="stat-value" id="provisionals-count">0</div>
+                        <div class="stat-change">Awaiting continuation</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Continuations Pending</div>
+                        <div class="stat-value" id="continuations-count">0</div>
+                        <div class="stat-change">In progress</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Patents Granted</div>
+                        <div class="stat-value" id="granted-count">0</div>
+                        <div class="stat-change positive">Active protection</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">High Priority</div>
+                        <div class="stat-value" id="high-priority-count" style="color: var(--accent-red);">0</div>
+                        <div class="stat-change">Needs attention</div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Deadlines -->
+                <div class="timeline">
+                    <h3 class="timeline-title">⚠️ Deadline Alerts</h3>
+                    <div id="alerts-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Recent Patents -->
+                <h3 style="font-size: 20px; margin-bottom: 16px;">Recent Patents</h3>
+                <div class="patent-grid" id="patent-list">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Provisionals Panel -->
+            <section class="panel" id="provisionals-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Provisional Applications</h2>
+                    <button class="btn btn-primary" onclick="showAddProvisionalModal()">+ New Provisional</button>
+                </div>
+                <div class="patent-grid" id="provisionals-list">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Continuations Panel -->
+            <section class="panel" id="continuations-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Continuations & Finals</h2>
+                    <button class="btn btn-primary" onclick="showAddContinuationModal()">+ New Continuation</button>
+                </div>
+                <div class="patent-grid" id="continuations-list">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Deadlines Panel -->
+            <section class="panel" id="deadlines-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Deadline Calendar</h2>
+                </div>
+                <div class="timeline">
+                    <h3 class="timeline-title">All Deadlines</h3>
+                    <div id="all-deadlines-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Documents Panel -->
+            <section class="panel" id="documents-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Document Library</h2>
+                    <button class="btn btn-primary" onclick="showAddDocumentModal()">+ Add Document</button>
+                </div>
+                <div id="documents-list">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Analytics Panel -->
+            <section class="panel" id="analytics-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Portfolio Analytics & Costs</h2>
+                    <div class="panel-actions">
+                        <button class="btn btn-secondary" onclick="exportPortfolioJSON()">📤 Export JSON</button>
+                    </div>
+                </div>
+
+                <!-- Cost Summary -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Invested</div>
+                        <div class="stat-value" id="total-invested">$0</div>
+                        <div class="stat-change">All-time costs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Avg Cost per Patent</div>
+                        <div class="stat-value" id="avg-cost">$0</div>
+                        <div class="stat-change">Per filing</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Next 12 Months</div>
+                        <div class="stat-value" id="projected-costs">$0</div>
+                        <div class="stat-change negative">Projected spend</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Portfolio Value</div>
+                        <div class="stat-value" id="portfolio-value">$0</div>
+                        <div class="stat-change positive">Estimated</div>
+                    </div>
+                </div>
+
+                <!-- Cost Breakdown -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px;">
+                    <div class="timeline">
+                        <h3 class="timeline-title">💰 Costs by Category</h3>
+                        <div id="costs-by-category">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="timeline">
+                        <h3 class="timeline-title">📅 Upcoming Costs</h3>
+                        <div id="upcoming-costs">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost Estimates -->
+                <div class="timeline" style="margin-top: 32px;">
+                    <h3 class="timeline-title">📊 Cost Estimates (Micro Entity - 25%)</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 16px 0;">
+                        <div>
+                            <h4 style="margin-bottom: 12px;">Provisional Application (2026)</h4>
+                            <div id="provisional-cost-estimate">
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                                    <span>USPTO Filing Fee</span>
+                                    <span>$65</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                                    <span>Attorney Fees (est.)</span>
+                                    <span>$500</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                                    <span>Drawings (est.)</span>
+                                    <span>$100</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 12px 0; font-weight: bold; color: var(--accent-blue);">
+                                    <span>TOTAL</span>
+                                    <span>$665</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 12px;">Utility Patent (Full, 2026)</h4>
+                            <div id="utility-cost-estimate">
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                                    <span>USPTO Fees</span>
+                                    <span>$658</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                                    <span>Attorney Fees</span>
+                                    <span>$1,500</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                                    <span>Maintenance (20yr)</span>
+                                    <span>$2,894</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 12px 0; font-weight: bold; color: var(--accent-blue);">
+                                    <span>TOTAL LIFETIME</span>
+                                    <span>$26,190</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Charts -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px;">
+                    <div class="timeline">
+                        <h3 class="timeline-title">📈 Status Distribution</h3>
+                        <div id="status-chart" style="padding: 16px 0;"></div>
+                    </div>
+                    <div class="timeline">
+                        <h3 class="timeline-title">💵 Cost Breakdown</h3>
+                        <div id="cost-chart" style="padding: 16px 0;"></div>
+                    </div>
+                </div>
+                <div class="timeline" style="margin-top: 24px;">
+                    <h3 class="timeline-title">📅 Filing Timeline (Last 12 Months)</h3>
+                    <div id="timeline-chart" style="padding: 16px 0;"></div>
+                </div>
+            </section>
+
+            <!-- Workflow Panel -->
+            <section class="panel" id="workflow-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Patent Workflow</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Draft</div>
+                        <div class="stat-value" id="workflow-draft">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Filed</div>
+                        <div class="stat-value" id="workflow-filed">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-value" id="workflow-pending">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Granted</div>
+                        <div class="stat-value" id="workflow-granted">0</div>
+                    </div>
+                </div>
+                <div class="timeline" style="margin-top: 24px;">
+                    <h3 class="timeline-title">Status Flow</h3>
+                    <div style="padding: 16px 0; color: var(--text-secondary);">
+                        <div style="display: flex; align-items: center; gap: 16px; margin: 12px 0;">
+                            <span style="background: var(--bg-tertiary); padding: 8px 16px; border-radius: 6px;">Draft</span>
+                            <span>→</span>
+                            <span style="background: rgba(59,130,246,0.2); color: #3b82f6; padding: 8px 16px; border-radius: 6px;">Filed</span>
+                            <span>→</span>
+                            <span style="background: rgba(245,158,11,0.2); color: #f59e0b; padding: 8px 16px; border-radius: 6px;">Pending</span>
+                            <span>→</span>
+                            <span style="background: rgba(16,185,129,0.2); color: #10b981; padding: 8px 16px; border-radius: 6px;">Granted</span>
+                        </div>
+                        <p style="margin-top: 16px;">Patents can also become "Abandoned" at any stage if not pursued.</p>
+                    </div>
+                </div>
+                <h3 style="font-size: 20px; margin: 24px 0 16px;">All Patents by Status</h3>
+                <div class="patent-grid" id="workflow-patent-list"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Patent Modal -->
+    <div class="modal-overlay" id="add-patent-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Patent</h3>
+                <button class="modal-close" onclick="closeModal('add-patent-modal')">&times;</button>
+            </div>
+            <form id="add-patent-form" onsubmit="addPatent(event)">
+                <div class="form-group">
+                    <label class="form-label">Patent Title *</label>
+                    <input type="text" class="form-input" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type *</label>
+                    <select class="form-input" name="type" required>
+                        <option value="provisional">Provisional</option>
+                        <option value="continuation">Continuation</option>
+                        <option value="utility">Utility Patent</option>
+                        <option value="design">Design Patent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Entity Type</label>
+                    <select class="form-input" name="entityType" required>
+                        <option value="micro">Micro (25% - self-filer)</option>
+                        <option value="small">Small (50%)</option>
+                        <option value="large">Large (100%)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Filing Date *</label>
+                    <input type="date" class="form-input" name="filingDate" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Application Number</label>
+                    <input type="text" class="form-input" name="applicationNumber">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-input" name="status">
+                        <option value="draft">Draft</option>
+                        <option value="filed">Filed</option>
+                        <option value="pending">Pending</option>
+                        <option value="granted">Granted</option>
+                        <option value="abandoned">Abandoned</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-input" name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Inventors</label>
+                    <input type="text" class="form-input" name="inventors" placeholder="Comma-separated">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Technology Category</label>
+                    <input type="text" class="form-input" name="category">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select class="form-input" name="priority">
+                        <option value="none">None</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-input" name="notes" rows="3" placeholder="Additional notes..."></textarea>
+                </div>
+
+                <!-- Cost Tracking -->
+                <div style="border-top: 1px solid var(--border-color); margin: 24px 0; padding-top: 24px;">
+                    <h4 style="margin-bottom: 16px;">💰 Cost Tracking</h4>
+                    <div class="form-group">
+                        <label class="form-label">Filing Fee Paid</label>
+                        <input type="number" class="form-input" name="filingFee" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Attorney Fees</label>
+                        <input type="number" class="form-input" name="attorneyFees" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Drawing Costs</label>
+                        <input type="number" class="form-input" name="drawingCosts" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Other Costs</label>
+                        <input type="number" class="form-input" name="otherCosts" placeholder="0.00" step="0.01">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Add Patent</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="ip-mission-control.js"></script>
+    <script src="ip-alerts.js"></script>
+    <script src="ip-import.js"></script>
+</body>
+</html>

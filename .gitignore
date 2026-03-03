@@ -1,0 +1,6 @@
+client_secret.json
+*.json
+.env
+*.pem
+id_rsa*
+

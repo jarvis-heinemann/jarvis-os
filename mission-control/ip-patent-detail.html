@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patent Detail View — IP Mission Control</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --border-color: #2a2a2a;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .back-btn {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .back-btn:hover { background: var(--bg-secondary); }
+        .patent-title { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .patent-meta { color: var(--text-secondary); display: flex; gap: 16px; flex-wrap: wrap; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-draft { background: rgba(160, 160, 160, 0.2); color: #a0a0a0; }
+        .status-filed { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .status-granted { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--text-secondary); }
+        .info-value { font-weight: 600; }
+        
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        .cost-total {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-yellow);
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .deadline-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .deadline-item.urgent { color: var(--accent-red); }
+        .deadline-item.warning { color: var(--accent-yellow); }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: var(--accent-blue); color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); }
+        
+        .timeline {
+            margin-top: 16px;
+        }
+        .timeline-event {
+            display: flex;
+            gap: 16px;
+            padding: 12px 0;
+        }
+        .timeline-date { min-width: 100px; color: var(--text-secondary); font-size: 14px; }
+        .timeline-content { flex: 1; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <a href="#" class="back-btn" onclick="window.close()">← Back to Dashboard</a>
+        </div>
+        <button class="btn btn-primary" onclick="exportPatent()">📤 Export Templates</button>
+    </div>
+
+    <div id="patent-detail"></div>
+
+    <script src="ip-mission-control.js"></script>
+    <script>
+        // Get patent ID from URL
+        const params = new URLSearchParams(window.location.search);
+        const patentId = params.get('id');
+        
+        function renderPatentDetail() {
+            const patent = ipState.patents.find(p => p.id === patentId);
+            if (!patent) {
+                document.getElementById('patent-detail').innerHTML = '<p>Patent not found</p>';
+                return;
+            }
+            
+            const costs = getPatentCosts(patentId);
+            const totalCost = costs.reduce((sum, c) => sum + c.amount, 0);
+            
+            const html = `
+                <div class="patent-title">${patent.title}</div>
+                <div class="patent-meta">
+                    <span class="status-badge status-${patent.status}">${patent.status}</span>
+                    <span>Type: ${patent.type}</span>
+                    <span>Category: ${patent.category || 'Uncategorized'}</span>
+                </div>
+                
+                <div class="grid" style="margin-top: 24px;">
+                    <!-- Basic Info -->
+                    <div class="card">
+                        <div class="card-title">📋 Basic Information</div>
+                        <div class="info-row">
+                            <span class="info-label">Application Number</span>
+                            <span class="info-value">${patent.applicationNumber || 'Not assigned'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Filing Date</span>
+                            <span class="info-value">${patent.filingDate || 'Not filed'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Priority Date</span>
+                            <span class="info-value">${patent.priorityDate || patent.filingDate || 'Not set'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Inventors</span>
+                            <span class="info-value">${patent.inventors?.join(', ') || 'Not specified'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Category</span>
+                            <span class="info-value">${patent.category || 'Uncategorized'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Priority</span>
+                            <span class="info-value">${patent.priority || 'Medium'}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Cost Tracking -->
+                    <div class="card">
+                        <div class="card-title">💰 Cost Tracking</div>
+                        ${costs.length > 0 ? costs.map(c => `
+                            <div class="cost-row">
+                                <span>${c.category} ${c.description ? '- ' + c.description : ''}</span>
+                                <span>$${c.amount.toLocaleString()}</span>
+                            </div>
+                        `).join('') : '<p style="color: var(--text-secondary);">No costs recorded</p>'}
+                        <div class="cost-row cost-total">
+                            <span>Total Invested</span>
+                            <span>$${totalCost.toLocaleString()}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Deadlines -->
+                    <div class="card">
+                        <div class="card-title">⏰ Deadlines</div>
+                        ${renderPatentDeadlines(patent)}
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="card">
+                        <div class="card-title">📝 Description</div>
+                        <p style="color: var(--text-secondary); line-height: 1.6;">
+                            ${patent.description || 'No description provided.'}
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-title">⚡ Actions</div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        ${patent.type === 'provisional' && patent.status === 'filed' ? `
+                            <button class="btn btn-primary" onclick="generateContinuation('${patent.id}')">
+                                📄 Create Continuation
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-secondary" onclick="exportPatentToPDF('${patent.id}')">
+                            📄 Export USPTO Templates
+                        </button>
+                        <button class="btn btn-secondary" onclick="addCostManually('${patent.id}')">
+                            ➕ Add Cost
+                        </button>
+                        <button class="btn btn-secondary" onclick="editPatent('${patent.id}')">
+                            ✏️ Edit Patent
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('patent-detail').innerHTML = html;
+        }
+        
+        function renderPatentDeadlines(patent) {
+            const deadlines = [];
+            
+            // Calculate deadlines based on patent type
+            if (patent.type === 'provisional' && patent.filingDate) {
+                const contDate = addMonths(patent.filingDate, 12);
+                const days = getDaysUntil(contDate);
+                deadlines.push({
+                    date: contDate,
+                    label: 'Continuation Due (12-month deadline)',
+                    days: days
+                });
+            }
+            
+            if (deadlines.length === 0) {
+                return '<p style="color: var(--text-secondary);">No upcoming deadlines</p>';
+            }
+            
+            return deadlines.map(d => {
+                const urgency = d.days <= 30 ? 'urgent' : d.days <= 60 ? 'warning' : '';
+                return `
+                    <div class="deadline-item ${urgency}">
+                        <span>${d.label}</span>
+                        <span>${d.days} days (${formatDate(d.date)})</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function editPatent(patentId) {
+            alert('Edit functionality - redirect to main dashboard');
+            window.location.href = 'ip-mission-control.html';
+        }
+        
+        function addCostManually(patentId) {
+            const category = prompt('Cost category: filing, attorney, drawing, maintenance, other');
+            const amount = prompt('Amount:');
+            const description = prompt('Description (optional):');
+            
+            if (category && amount) {
+                addCost(patentId, category, parseFloat(amount), description);
+                renderPatentDetail();
+            }
+        }
+        
+        function exportPatent() {
+            exportPatentToPDF(patentId);
+        }
+        
+        // Load data and render
+        loadIPData();
+        renderPatentDetail();
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Control — Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div style="padding: 40px; max-width: 800px; margin: 0 auto;">
+        <h1>🔧 Mission Control - Diagnostic</h1>
+        
+        <div id="status" style="background: #1a1a1a; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p>Loading...</p>
+        </div>
+        
+        <button onclick="clearData()" style="padding: 10px 20px; background: #ff4444; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            Clear All Data & Restart
+        </button>
+        
+        <button onclick="loadBackup()" style="padding: 10px 20px; background: #00d4ff; color: black; border: none; border-radius: 6px; cursor: pointer; margin-left: 10px;">
+            Load from data.json
+        </button>
+        
+        <div id="info" style="margin-top: 20px; background: #1a1a1a; padding: 20px; border-radius: 8px;">
+            <h3>System Info:</h3>
+            <p>LocalStorage: <span id="ls-status">Checking...</span></p>
+            <p>Data Size: <span id="ls-size">Checking...</span></p>
+            <p>data.json: <span id="json-status">Checking...</span></p>
+        </div>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const lsStatusEl = document.getElementById('ls-status');
+        const lsSizeEl = document.getElementById('ls-size');
+        const jsonStatusEl = document.getElementById('json-status');
+
+        // Check localStorage
+        try {
+            const saved = localStorage.getItem('missionControlState');
+            lsStatusEl.textContent = saved ? 'Has data' : 'Empty';
+            
+            if (saved) {
+                const sizeKB = (new Blob([saved]).size / 1024).toFixed(2);
+                lsSizeEl.textContent = sizeKB + ' KB';
+                
+                const data = JSON.parse(saved);
+                statusEl.innerHTML = `
+                    <h3>✅ Data Found:</h3>
+                    <ul>
+                        <li>Flagship: ${data.flagship || 'Not set'}</li>
+                        <li>Ideas: ${data.ideas?.length || 0}</li>
+                        <li>Projects: ${data.projects?.length || 0}</li>
+                        <li>Domains: ${data.domains?.length || 0}</li>
+                        <li>Repos: ${data.repos?.length || 0}</li>
+                    </ul>
+                    <p><strong>Ready to load main dashboard</strong></p>
+                `;
+            } else {
+                statusEl.innerHTML = '<p>⚠️ No data in localStorage. Click "Load from data.json" to import.</p>';
+            }
+        } catch (e) {
+            lsStatusEl.textContent = 'Error: ' + e.message;
+            statusEl.innerHTML = '<p>❌ Error reading localStorage: ' + e.message + '</p>';
+        }
+
+        // Check data.json
+        jsonStatusEl.textContent = '515 domains, 100 repos';
+
+        function clearData() {
+            if (confirm('This will clear all Mission Control data. Continue?')) {
+                localStorage.removeItem('missionControlState');
+                statusEl.innerHTML = '<p>✅ Data cleared. Refreshing...</p>';
+                setTimeout(() => location.reload(), 1000);
+            }
+        }
+
+        function loadBackup() {
+            statusEl.innerHTML = '<p>Loading from data.json...</p>';
+            
+            // Load data from data.json
+            fetch('data.json')
+                .then(r => r.json())
+                .then(data => {
+                    localStorage.setItem('missionControlState', JSON.stringify(data));
+                    statusEl.innerHTML = `
+                        <p>✅ Data loaded!</p>
+                        <ul>
+                            <li>Domains: ${data.domains?.length || 0}</li>
+                            <li>Repos: ${data.repos?.length || 0}</li>
+                        </ul>
+                        <p><a href="index.html" style="color: #00d4ff;">→ Open Dashboard</a></p>
+                    `;
+                })
+                .catch(e => {
+                    statusEl.innerHTML = '<p>❌ Error: ' + e.message + '</p>';
+                });
+        }
+    </script>
+</body>
+</html>

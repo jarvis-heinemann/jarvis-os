@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Control — Gabriel's Command Center</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <h1>⚡ Mission Control</h1>
+                <p class="tagline">Architect's Command Center</p>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item active" data-panel="focus">
+                    <span class="icon">🎯</span>
+                    <span class="label">Focus Mode</span>
+                </li>
+                <li class="nav-item" data-panel="ideas">
+                    <span class="icon">💡</span>
+                    <span class="label">Idea Vault</span>
+                </li>
+                <li class="nav-item" data-panel="projects">
+                    <span class="icon">🚀</span>
+                    <span class="label">Projects</span>
+                </li>
+                <li class="nav-item" data-panel="delegation">
+                    <span class="icon">🤝</span>
+                    <span class="label">Delegation Hub</span>
+                </li>
+                <li class="nav-item" data-panel="automation">
+                    <span class="icon">🤖</span>
+                    <span class="label">Automation</span>
+                </li>
+                <li class="nav-item" data-panel="metrics">
+                    <span class="icon">📊</span>
+                    <span class="label">Metrics</span>
+                </li>
+                <li class="nav-item" data-panel="rhythm">
+                    <span class="icon">💓</span>
+                    <span class="label">Rhythm</span>
+                </li>
+                <li class="nav-item" data-panel="library">
+                    <span class="icon">📚</span>
+                    <span class="label">Library</span>
+                </li>
+                <li class="nav-item" data-panel="vision">
+                    <span class="icon">🌌</span>
+                    <span class="label">Vision Room</span>
+                </li>
+                <li class="nav-item" data-panel="repos">
+                    <span class="icon">📦</span>
+                    <span class="label">GitHub</span>
+                </li>
+                <li class="nav-item" data-panel="domains">
+                    <span class="icon">🌐</span>
+                    <span class="label">Domains</span>
+                </li>
+                <li class="nav-item" data-panel="agents">
+                    <span class="icon">🤖</span>
+                    <span class="label">Agents</span>
+                </li>
+            </ul>
+            
+            <div class="flagship-indicator">
+                <p class="flagship-label">🚩 Flagship</p>
+                <p class="flagship-name" id="flagship-name">Not Selected</p>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Focus Mode Panel -->
+            <section class="panel active" id="focus-panel">
+                <div class="panel-header">
+                    <h2>🎯 Focus Mode</h2>
+                    <p class="subtitle">One flagship. One seed. One task.</p>
+                </div>
+                
+                <div class="focus-grid">
+                    <div class="focus-card flagship-card">
+                        <div class="card-header">
+                            <h3>🚩 Flagship</h3>
+                            <button class="btn-small" onclick="selectFlagship()">Select</button>
+                        </div>
+                        <div class="card-content" id="flagship-content">
+                            <p class="placeholder">Choose your gravitational center</p>
+                            <div class="flagship-options" id="flagship-options">
+                                <button class="flagship-btn" data-flagship="ClaimHaus">ClaimHaus (Tokenized Debt)</button>
+                                <button class="flagship-btn" data-flagship="Mining Marketplace">Tokenized Mining Marketplace</button>
+                                <button class="flagship-btn" data-flagship="AI Agent Platform">AI Agent Operations Platform</button>
+                                <button class="flagship-btn" data-flagship="Marina Platform">Marina Management Platform</button>
+                                <button class="flagship-btn" data-flagship="Courier Platform">Courier/Logistics Automation</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="focus-card seed-card">
+                        <div class="card-header">
+                            <h3>🌱 Active Seed (MVU)</h3>
+                            <button class="btn-small" onclick="addSeed()">+ Add</button>
+                        </div>
+                        <div class="card-content" id="seed-content">
+                            <p class="placeholder">Minimum Viable Universe in progress</p>
+                        </div>
+                    </div>
+                    
+                    <div class="focus-card today-card">
+                        <div class="card-header">
+                            <h3>📅 ONE Thing Today</h3>
+                            <button class="btn-small" onclick="setTodayTask()">Set</button>
+                        </div>
+                        <div class="card-content" id="today-content">
+                            <p class="placeholder">What moves the needle today?</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="focus-reminder">
+                    <p>⚡ Remember: Build the seed, not the galaxy. Core loop first. MVU before ecosystem.</p>
+                </div>
+            </section>
+
+            <!-- Idea Vault Panel -->
+            <section class="panel" id="ideas-panel">
+                <div class="panel-header">
+                    <h2>💡 Idea Vault</h2>
+                    <p class="subtitle">Catch everything. None go direct to dev.</p>
+                </div>
+                
+                <div class="idea-capture">
+                    <input type="text" id="idea-input" placeholder="Capture an idea..." />
+                    <button class="btn-primary" onclick="captureIdea()">Capture</button>
+                </div>
+                
+                <div class="idea-score-form" id="idea-score-form" style="display: none;">
+                    <h4>Score This Idea (1-10)</h4>
+                    <div class="score-grid">
+                        <label>Impact <input type="number" min="1" max="10" class="score-input" data-dim="impact" /></label>
+                        <label>Leverage <input type="number" min="1" max="10" class="score-input" data-dim="leverage" /></label>
+                        <label>Momentum <input type="number" min="1" max="10" class="score-input" data-dim="momentum" /></label>
+                        <label>Excitement <input type="number" min="1" max="10" class="score-input" data-dim="excitement" /></label>
+                        <label>Ease <input type="number" min="1" max="10" class="score-input" data-dim="ease" /></label>
+                        <label>Revenue <input type="number" min="1" max="10" class="score-input" data-dim="revenue" /></label>
+                        <label>Strategic Fit <input type="number" min="1" max="10" class="score-input" data-dim="strategic" /></label>
+                        <label>Automation <input type="number" min="1" max="10" class="score-input" data-dim="automation" /></label>
+                    </div>
+                    <button class="btn-primary" onclick="scoreIdea()">Calculate & Save</button>
+                </div>
+                
+                <div class="ideas-list" id="ideas-list">
+                    <!-- Ideas will be populated here -->
+                </div>
+                
+                <div class="idea-thresholds">
+                    <p>📊 Scoring Guide:</p>
+                    <ul>
+                        <li><strong>7.0+</strong> — Immediate contender (green)</li>
+                        <li><strong>5.0-6.9</strong> — Secondary (yellow)</li>
+                        <li><strong>&lt;5.0</strong> — Archive for later (gray)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Projects Panel -->
+            <section class="panel" id="projects-panel">
+                <div class="panel-header">
+                    <h2>🚀 Projects</h2>
+                    <button class="btn-primary" onclick="addProject()">+ New Project</button>
+                </div>
+                
+                <div class="projects-grid" id="projects-grid">
+                    <!-- Projects will be populated here -->
+                </div>
+            </section>
+
+            <!-- Delegation Hub Panel -->
+            <section class="panel" id="delegation-panel">
+                <div class="panel-header">
+                    <h2>🤝 Delegation Hub</h2>
+                    <p class="subtitle">Assign → Team or AI. You stay at altitude.</p>
+                </div>
+                
+                <div class="delegation-columns">
+                    <div class="delegation-col">
+                        <h3>👤 Team Tasks</h3>
+                        <div id="team-tasks"></div>
+                    </div>
+                    <div class="delegation-col">
+                        <h3>🤖 AI Agents</h3>
+                        <div id="agent-tasks"></div>
+                    </div>
+                </div>
+                
+                <button class="btn-primary" onclick="addDelegatedTask()">+ Delegate Task</button>
+            </section>
+
+            <!-- Automation Panel -->
+            <section class="panel" id="automation-panel">
+                <div class="panel-header">
+                    <h2>🤖 Automation Control Panel</h2>
+                    <p class="subtitle">Monitor what's running automatically</p>
+                </div>
+                
+                <div class="automation-grid" id="automation-grid">
+                    <div class="automation-card">
+                        <h4>📊 PBN Health Monitor</h4>
+                        <p class="status running">Running</p>
+                        <p class="last-check">Last check: 2h ago</p>
+                    </div>
+                    <div class="automation-card">
+                        <h4>🔍 SEO Crawler</h4>
+                        <p class="status idle">Idle</p>
+                        <p class="last-check">Next run: 6h</p>
+                    </div>
+                    <div class="automation-card">
+                        <h4>📧 Email Monitor</h4>
+                        <p class="status running">Running</p>
+                        <p class="last-check">Last check: 15m ago</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Metrics Panel -->
+            <section class="panel" id="metrics-panel">
+                <div class="panel-header">
+                    <h2>📊 Money & Metrics</h2>
+                    <p class="subtitle">Revenue • Churn • SEO • PBN Health • Analytics</p>
+                </div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>💰 Revenue</h4>
+                        <p class="metric-value">$0</p>
+                        <p class="metric-label">This month</p>
+                    </div>
+                    <div class="metric-card">
+                        <h4>📈 Active Projects</h4>
+                        <p class="metric-value" id="active-projects-count">0</p>
+                        <p class="metric-label">In development</p>
+                    </div>
+                    <div class="metric-card">
+                        <h4>🎯 Ideas Scored</h4>
+                        <p class="metric-value" id="ideas-count">0</p>
+                        <p class="metric-label">In vault</p>
+                    </div>
+                    <div class="metric-card">
+                        <h4>✅ Completed</h4>
+                        <p class="metric-value" id="completed-count">0</p>
+                        <p class="metric-label">This quarter</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Rhythm Panel -->
+            <section class="panel" id="rhythm-panel">
+                <div class="panel-header">
+                    <h2>💓 Personal Rhythm Tracker</h2>
+                    <p class="subtitle">Know your cycles. Don't overextend.</p>
+                </div>
+                
+                <div class="rhythm-content">
+                    <p>Track your energy patterns to optimize burst/rest cycles.</p>
+                    <div class="energy-tracker">
+                        <h4>Today's Energy</h4>
+                        <div class="energy-scale">
+                            <button class="energy-btn" data-level="1">😴 Low</button>
+                            <button class="energy-btn" data-level="2">😐 Normal</button>
+                            <button class="energy-btn" data-level="3">⚡ High</button>
+                            <button class="energy-btn" data-level="4">🔥 Peak</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Library Panel -->
+            <section class="panel" id="library-panel">
+                <div class="panel-header">
+                    <h2>📚 Document Library</h2>
+                    <p class="subtitle">Specs • Templates • SOPs • Schemas</p>
+                </div>
+                
+                <div class="library-grid">
+                    <div class="library-card">
+                        <h4>📋 Templates</h4>
+                        <p>Project templates, MVU specs, core loop docs</p>
+                    </div>
+                    <div class="library-card">
+                        <h4>📄 SOPs</h4>
+                        <p>Standard operating procedures</p>
+                    </div>
+                    <div class="library-card">
+                        <h4>🗺️ Schemas</h4>
+                        <p>Database schemas, API structures</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Vision Room Panel -->
+            <section class="panel" id="vision-panel">
+                <div class="panel-header">
+                    <h2>🌌 Vision Room</h2>
+                    <p class="subtitle">The 10-year dreams. Visit — don't build from here.</p>
+                </div>
+                
+                <div class="vision-content">
+                    <div class="vision-card">
+                        <h4>🏆 10-Year Vision</h4>
+                        <p>Sovereign ecosystem builder. Multiple interconnected platforms. AI-driven operations. Tokenized marketplaces. A personal digital empire that runs 24/7.</p>
+                    </div>
+                    <div class="vision-card">
+                        <h4>🎯 5-Year Target</h4>
+                        <p>3-5 launched universes. Interconnected. Revenue-generating. Self-scaling.</p>
+                    </div>
+                    <div class="vision-card">
+                        <h4>📍 1-Year Focus</h4>
+                        <p>One flagship. 2-3 MVUs. Core loops proven. Team + AI delegation operational.</p>
+                    </div>
+                </div>
+                
+                <div class="vision-reminder">
+                    <p>⚠️ Look, dream, align — then return to Focus Mode and build the seed.</p>
+                </div>
+            </section>
+
+            <!-- GitHub/Repos Panel -->
+            <section class="panel" id="repos-panel">
+                <div class="panel-header">
+                    <h2>📦 GitHub Repositories</h2>
+                    <button class="btn-primary" onclick="addRepo()">+ Add Repo</button>
+                </div>
+                
+                <div class="repos-grid" id="repos-grid">
+                    <!-- Repos will be populated here -->
+                </div>
+                
+                <div style="margin-top: 24px; padding: 16px; background: var(--bg-card); border-radius: 8px;">
+                    <p style="font-size: 13px; color: var(--text-secondary);">
+                        💡 <strong>Tip:</strong> Link repos to projects to track which codebases support which universes. 
+                        In future: auto-sync with GitHub API for real-time status.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Domains Panel -->
+            <section class="panel" id="domains-panel">
+                <div class="panel-header">
+                    <h2>🌐 Domain Portfolio</h2>
+                    <button class="btn-primary" onclick="addDomain()">+ Add Domain</button>
+                </div>
+                
+                <div class="domain-stats" id="domain-stats">
+                    <div class="stat"><strong>0</strong> Total</div>
+                    <div class="stat"><strong>0</strong> Active</div>
+                    <div class="stat"><strong>0</strong> Parked</div>
+                    <div class="stat"><strong>0</strong> For Sale</div>
+                </div>
+                
+                <div class="domain-filters">
+                    <button class="domain-filter-btn active" onclick="filterDomains('all')">All</button>
+                    <button class="domain-filter-btn" onclick="filterDomains('active')">Active</button>
+                    <button class="domain-filter-btn" onclick="filterDomains('parked')">Parked</button>
+                    <button class="domain-filter-btn" onclick="filterDomains('for-sale')">For Sale</button>
+                </div>
+                
+                <div class="domains-list" id="domains-list">
+                    <!-- Domains will be populated here -->
+                </div>
+            </section>
+
+            <!-- Agents Panel -->
+            <section class="panel" id="agents-panel">
+                <div class="panel-header">
+                    <h2>🤖 AI Agent Registry</h2>
+                    <button class="btn-primary" onclick="addAgent()">+ Register Agent</button>
+                </div>
+                
+                <div class="agents-grid" id="agents-list">
+                    <!-- Agents will be populated here -->
+                </div>
+                
+                <div style="margin-top: 24px;">
+                    <p style="font-size: 13px; color: var(--text-secondary);">
+                        🎯 <strong>3,000+ agents</strong> in your ecosystem. Track which are active, what they do, and which projects they support.
+                    </p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Global Search Bar (appears on all panels) -->
+    <div class="global-search" style="position: fixed; top: 20px; right: 40px; width: 300px; z-index: 1000;">
+        <input type="text" id="global-search" placeholder="Search... (⌘K)">
+    </div>
+
+    <!-- Export/Import Actions -->
+    <div class="data-actions">
+        <button onclick="exportData()" title="Export all data">📤 Export</button>
+        <button onclick="importData()" title="Import from backup">📥 Import</button>
+    </div>
+
+    <!-- Keyboard Shortcuts Hint -->
+    <div class="shortcut-hint" id="shortcut-hint">
+        <kbd>⌘</kbd><kbd>K</kbd> Search &nbsp;|&nbsp;
+        <kbd>⌘</kbd><kbd>N</kbd> New Idea &nbsp;|&nbsp;
+        <kbd>⌘</kbd><kbd>1-9</kbd> Switch Panels
+    </div>
+
+    <script src="app.js"></script>
+    <script src="app-v2.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+echo "📧 Email Sync"
+echo "============="
+echo ""
+echo "This script will sync email engagement data from Smartlead"
+echo ""
+echo "Prerequisites:"
+echo "  1. Sign up for Smartlead (https://smartlead.ai)"
+echo "  2. Get API key from Settings → API"
+echo "  3. Add API key to ~/.openclaw/credentials/smartlead.key"
+echo ""
+echo "Current status: Not configured"
+echo ""
+echo "To configure:"
+echo "  mkdir -p ~/.openclaw/credentials"
+echo "  echo 'YOUR_API_KEY' > ~/.openclaw/credentials/smartlead.key"
+echo "  ./sync-emails.sh"
